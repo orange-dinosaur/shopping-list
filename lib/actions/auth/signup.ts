@@ -49,7 +49,7 @@ export async function signup(
     }
 
     try {
-        const signupResult = await auth.api.signUpEmail({
+        await auth.api.signUpEmail({
             body: {
                 name: validatedFields.data?.username,
                 email: validatedFields.data?.email,
@@ -60,8 +60,6 @@ export async function signup(
                 callbackURL: '/login',
             },
         });
-
-        console.log('\nsignupResult\n', signupResult, '\n');
 
         // if auth is successful clear fields
         returnState.username = '';
