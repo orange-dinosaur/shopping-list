@@ -2,7 +2,7 @@
 
 import { RegisterFormState } from '@/lib/types/auth';
 import { signupSchema } from '@/lib/schemas/auth';
-/* import { authClient } from '@/lib/auth-client'; */
+import { auth } from '@/lib/auth';
 
 export async function signup(
     inistialState: RegisterFormState,
@@ -49,31 +49,34 @@ export async function signup(
     }
 
     try {
-        /* const signupResult = await authClient.signUp.email({
-            name: validatedFields.data?.username,
-            email: validatedFields.data?.email,
-            password: validatedFields.data?.password,
-            image:
-                process.env.NEXT_PUBLIC_DEFAULT_USER_IMAGE_API +
-                validatedFields.data?.email,
-            callbackURL:
-                process.env.NEXT_PUBLIC_VERIFICATION_EMAIL_CALLBACK_URL,
+        const signupResult = await auth.api.signUpEmail({
+            body: {
+                name: validatedFields.data?.username,
+                email: validatedFields.data?.email,
+                password: validatedFields.data?.password,
+                image:
+                    process.env.NEXT_PUBLIC_DEFAULT_USER_IMAGE_API +
+                    validatedFields.data?.email,
+                callbackURL: '/login',
+            },
         });
 
-        if (signupResult.error) {
-            returnState.status = signupResult.error.status;
-            returnState.message = signupResult.error.message;
-            return returnState;
-        }
+        console.log('\nsignupResult\n', signupResult, '\n');
 
         // if auth is successful clear fields
         returnState.username = '';
         returnState.email = '';
-        returnState.password = ''; */
-    } catch (error) {
+        returnState.password = '';
+    } catch (error: unknown) {
         console.error(error);
-        returnState.status = 500;
-        returnState.message = 'Internal Server Error';
+        // Handle BetterAuth APIError
+        if (error && typeof error === 'object' && 'status' in error && 'message' in error) {
+            returnState.status = (error as { status: number }).status || 500;
+            returnState.message = (error as { message: string }).message || 'An error occurred';
+        } else {
+            returnState.status = 500;
+            returnState.message = 'Internal Server Error';
+        }
     }
 
     return returnState;

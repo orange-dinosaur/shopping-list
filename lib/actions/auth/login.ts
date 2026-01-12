@@ -2,7 +2,7 @@
 
 import { LoginFormState } from '@/lib/types/auth';
 import { loginSchema } from '@/lib/schemas/auth';
-/* import { authClient } from '@/lib/auth-client'; */
+import { authClient } from '@/lib/auth-client';
 
 export async function login(
     email: string,
@@ -41,7 +41,7 @@ export async function login(
     }
 
     try {
-        /* const loginResult = await authClient.signIn.email({
+        const loginResult = await authClient.signIn.email({
             email: validatedFields.data?.email,
             password: validatedFields.data?.password,
             rememberMe: true,
@@ -51,7 +51,7 @@ export async function login(
             returnState.status = loginResult.error.status;
             returnState.message = loginResult.error.message;
             return returnState;
-        } */
+        }
     } catch (error) {
         console.error(error);
         returnState.status = 500;

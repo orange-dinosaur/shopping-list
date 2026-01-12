@@ -1,7 +1,7 @@
 'use client';
 
 import { LogoutFormState } from '@/lib/types/auth';
-/* import { authClient } from '@/lib/auth-client'; */
+import { authClient } from '@/lib/auth-client';
 
 export async function logout(): Promise<LogoutFormState> {
     const returnState: LogoutFormState = {
@@ -10,13 +10,13 @@ export async function logout(): Promise<LogoutFormState> {
     };
 
     try {
-        /* const logoutResult = await authClient.signOut();
+        const logoutResult = await authClient.signOut();
 
         if (logoutResult.error) {
             returnState.status = logoutResult.error.status;
             returnState.message = logoutResult.error.message;
             return returnState;
-        } */
+        }
     } catch (error) {
         console.error(error);
         returnState.status = 500;

@@ -1,30 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server';
-/* import { getSessionCookie } from 'better-auth/cookies'; */
+import { getSessionCookie } from 'better-auth/cookies';
 
 const protectedRoutes = [
-    '/home',
+    '/',
 ];
 const authRoutes = ['/login', '/signup'];
 
 export default async function proxy(request: NextRequest) {
-    /* const sessionCookie = getSessionCookie(request); */
+    const sessionCookie = getSessionCookie(request);
     const pathname = request.nextUrl.pathname;
 
-    // Not logged in trying to access protected route -> redirect to login
-    /* if (
-        !sessionCookie &&
-        protectedRoutes.some((route) => pathname.startsWith(route))
-    ) {
-        return NextResponse.redirect(new URL('/login', request.url));
-    } */
-
-    // Already logged in trying to access auth routes -> redirect to home
-    /* if (
+    // Check auth routes first - logged in users get redirected to home
+    if (
         sessionCookie &&
         authRoutes.some((route) => pathname.startsWith(route))
     ) {
-        return NextResponse.redirect(new URL('/home', request.url));
-    } */
+        return NextResponse.redirect(new URL('/', request.url));
+    }
+
+    // Not logged in trying to access protected route -> redirect to login
+    // Use exact match for '/' to avoid matching all paths
+    if (
+        !sessionCookie &&
+        protectedRoutes.some((route) => 
+            route === '/' ? pathname === '/' : pathname.startsWith(route)
+        )
+    ) {
+        return NextResponse.redirect(new URL('/login', request.url));
+    }
 
     return NextResponse.next();
 }
