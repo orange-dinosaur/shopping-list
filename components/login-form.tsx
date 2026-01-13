@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { login } from '@/lib/actions/auth/login';
-import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
@@ -14,7 +13,7 @@ export function LoginForm({
     className,
     ...props
 }: React.ComponentProps<'div'>) {
-    const router = useRouter();
+
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
@@ -34,7 +33,8 @@ export function LoginForm({
             return;
         }
 
-        router.push('/');
+        // Use hard redirect to ensure cookies are picked up by the server
+        window.location.href = '/';
     }
 
     return (
