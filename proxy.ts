@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSessionCookie } from 'better-auth/cookies';
+import { auth } from '@/lib/auth';
 
 const protectedRoutes = ['/'];
 const authRoutes = ['/login', '/signup'];
 
 export default async function proxy(request: NextRequest) {
-    const sessionCookie = getSessionCookie(request);
+    const sessionCookie = await auth.api.getSession({
+        headers: request.headers,
+    });
     const pathname = request.nextUrl.pathname;
 
     // Check auth routes first - logged in users get redirected to home
