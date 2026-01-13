@@ -287,7 +287,7 @@ export function Lists() {
                                                         item.id
                                                     )
                                                 }
-                                                className="h-7 w-7 text-gray-300 hover:text-red-500 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                className="h-7 w-7 text-red-400 md:text-gray-300 hover:text-red-500 hover:bg-red-50 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                                                 <Trash2 className="h-4 w-4" />
                                             </Button>
                                         </div>
