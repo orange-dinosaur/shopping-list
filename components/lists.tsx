@@ -274,8 +274,8 @@ export function Lists() {
                                     {list.items.map((item) => (
                                         <div
                                             key={item.id}
-                                            className="flex items-center justify-between py-1 px-1 hover:bg-white/60 rounded-md group transition-colors">
-                                            <span className="text-md text-gray-700 font-semibold">
+                                            className="flex items-start justify-between gap-2 py-1 px-1 hover:bg-white/60 rounded-md group transition-colors min-w-0 w-full">
+                                            <span className="text-md text-gray-700 font-semibold flex-1 break-words whitespace-normal min-w-0">
                                                 • {item.name}
                                             </span>
                                             <Button
@@ -287,7 +287,7 @@ export function Lists() {
                                                         item.id
                                                     )
                                                 }
-                                                className="h-7 w-7 text-red-400 md:text-gray-300 hover:text-red-500 hover:bg-red-50 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                                                className="h-7 w-7 mt-0.5 text-red-400 md:text-gray-300 hover:text-red-500 hover:bg-red-50 transition-opacity flex-shrink-0">
                                                 <Trash2 className="h-4 w-4" />
                                             </Button>
                                         </div>
