@@ -19,6 +19,7 @@ import {
 } from '@/components/ui/collapsible';
 import { Plus, Trash2, LogOut, ChevronDown } from 'lucide-react';
 import Image from 'next/image';
+import { UserMenu } from '@/components/user-menu';
 
 interface ShoppingItem {
     id: string;
@@ -140,35 +141,7 @@ export default function Home() {
                         />
                         <span className="font-bold text-xl">Shopping List</span>
                     </div>
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <button className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity focus:outline-none">
-                                <Avatar className="h-8 w-8">
-                                    <AvatarImage
-                                        src="/placeholder-avatar.png"
-                                        alt="Profile"
-                                    />
-                                    <AvatarFallback className="bg-orange-200 text-orange-800 text-sm">
-                                        A
-                                    </AvatarFallback>
-                                </Avatar>
-                                <span className="text-sm font-medium text-gray-700">
-                                    Profile
-                                </span>
-                            </button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-40">
-                            <DropdownMenuItem
-                                className="text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer"
-                                onClick={() => {
-                                    // TODO: Implement actual logout logic
-                                    console.log('Logout clicked');
-                                }}>
-                                <LogOut className="mr-2 h-4 w-4" />
-                                Logout
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+                    <UserMenu />
                 </div>
             </header>
 
