@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -10,7 +10,13 @@ import {
     CollapsibleContent,
     CollapsibleTrigger,
 } from '@/components/ui/collapsible';
-import { Plus, Trash2, ChevronDown } from 'lucide-react';
+import { Plus, Trash2, ChevronDown, Loader2 } from 'lucide-react';
+import {
+    getListItems,
+    addListItem,
+    deleteListItem,
+} from '@/lib/actions/list-items';
+import { toast } from '@/components/ui/sonner';
 
 interface ShoppingItem {
     id: string;
@@ -27,7 +33,7 @@ interface CategoryList {
     items: ShoppingItem[];
 }
 
-const initialLists: CategoryList[] = [
+const categoryConfig = [
     {
         name: 'Red',
         tag: 'nope',
@@ -35,7 +41,6 @@ const initialLists: CategoryList[] = [
         bgColor: 'bg-red-50/50',
         tagBgColor: 'bg-red-100',
         tagTextColor: 'text-red-700',
-        items: [],
     },
     {
         name: 'Orange',
@@ -44,7 +49,6 @@ const initialLists: CategoryList[] = [
         bgColor: 'bg-orange-50/50',
         tagBgColor: 'bg-orange-100',
         tagTextColor: 'text-orange-700',
-        items: [],
     },
     {
         name: 'Yellow',
@@ -53,7 +57,6 @@ const initialLists: CategoryList[] = [
         bgColor: 'bg-yellow-50/50',
         tagBgColor: 'bg-yellow-100',
         tagTextColor: 'text-yellow-700',
-        items: [],
     },
     {
         name: 'Green',
@@ -62,36 +65,103 @@ const initialLists: CategoryList[] = [
         bgColor: 'bg-green-50/50',
         tagBgColor: 'bg-green-100',
         tagTextColor: 'text-green-700',
-        items: [],
     },
 ];
 
 export function Lists() {
-    const [lists, setLists] = useState<CategoryList[]>(initialLists);
+    const [lists, setLists] = useState<CategoryList[]>(
+        categoryConfig.map((config) => ({ ...config, items: [] }))
+    );
     const [inputValues, setInputValues] = useState<{ [key: string]: string }>(
         {}
     );
+    const [isLoading, setIsLoading] = useState(true);
+    const [pendingItems, setPendingItems] = useState<Set<string>>(new Set());
 
-    const handleAddItem = (listIndex: number) => {
+    useEffect(() => {
+        async function fetchItems() {
+            const result = await getListItems();
+            if (result.status === 200) {
+                setLists(
+                    categoryConfig.map((config) => ({
+                        ...config,
+                        items: result.items
+                            .filter((item) => item.list === config.name)
+                            .map((item) => ({ id: item.id, name: item.name })),
+                    }))
+                );
+            } else if (result.status === 401) {
+                // User not logged in - keep empty lists
+            } else {
+                toast.error(result.message || 'Failed to load items');
+            }
+            setIsLoading(false);
+        }
+        fetchItems();
+    }, []);
+
+    const handleAddItem = async (listIndex: number) => {
         const inputValue = inputValues[listIndex] || '';
         if (!inputValue.trim()) return;
 
+        const listName = lists[listIndex].name;
+
+        // Optimistic update
+        const tempId = `temp-${crypto.randomUUID()}`;
         setLists((prevLists) => {
             const newLists = [...prevLists];
             newLists[listIndex] = {
                 ...newLists[listIndex],
                 items: [
                     ...newLists[listIndex].items,
-                    { id: Date.now().toString(), name: inputValue.trim() },
+                    { id: tempId, name: inputValue.trim() },
                 ],
             };
             return newLists;
         });
-
         setInputValues((prev) => ({ ...prev, [listIndex]: '' }));
+
+        const result = await addListItem(listName, inputValue.trim());
+
+        if (result.status === 200 && result.item) {
+            // Replace temp ID with real ID
+            setLists((prevLists) => {
+                const newLists = [...prevLists];
+                newLists[listIndex] = {
+                    ...newLists[listIndex],
+                    items: newLists[listIndex].items.map((item) =>
+                        item.id === tempId
+                            ? { id: result.item!.id, name: result.item!.name }
+                            : item
+                    ),
+                };
+                return newLists;
+            });
+        } else {
+            // Rollback on error
+            setLists((prevLists) => {
+                const newLists = [...prevLists];
+                newLists[listIndex] = {
+                    ...newLists[listIndex],
+                    items: newLists[listIndex].items.filter(
+                        (item) => item.id !== tempId
+                    ),
+                };
+                return newLists;
+            });
+            toast.error(result.message || 'Failed to add item');
+        }
     };
 
-    const handleDeleteItem = (listIndex: number, itemId: string) => {
+    const handleDeleteItem = async (listIndex: number, itemId: string) => {
+        if (pendingItems.has(itemId)) return;
+
+        setPendingItems((prev) => new Set(prev).add(itemId));
+
+        // Optimistic update
+        const deletedItem = lists[listIndex].items.find(
+            (item) => item.id === itemId
+        );
         setLists((prevLists) => {
             const newLists = [...prevLists];
             newLists[listIndex] = {
@@ -101,6 +171,29 @@ export function Lists() {
                 ),
             };
             return newLists;
+        });
+
+        const result = await deleteListItem(itemId);
+
+        if (result.status !== 200) {
+            // Rollback on error
+            if (deletedItem) {
+                setLists((prevLists) => {
+                    const newLists = [...prevLists];
+                    newLists[listIndex] = {
+                        ...newLists[listIndex],
+                        items: [...newLists[listIndex].items, deletedItem],
+                    };
+                    return newLists;
+                });
+            }
+            toast.error(result.message || 'Failed to delete item');
+        }
+
+        setPendingItems((prev) => {
+            const next = new Set(prev);
+            next.delete(itemId);
+            return next;
         });
     };
 
@@ -117,6 +210,14 @@ export function Lists() {
         }
     };
 
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+            </div>
+        );
+    }
+
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {lists.map((list, listIndex) => (
@@ -127,7 +228,7 @@ export function Lists() {
                             <CollapsibleTrigger asChild>
                                 <button className="w-full flex items-center justify-between cursor-pointer group">
                                     <div className="flex items-center gap-3">
-                                        <CardTitle className="text-lg font-semibold">
+                                        <CardTitle className="text-xl font-bold">
                                             {list.name}
                                         </CardTitle>
                                         <Badge
@@ -140,6 +241,7 @@ export function Lists() {
                                 </button>
                             </CollapsibleTrigger>
                         </CardHeader>
+
                         <CollapsibleContent>
                             <CardContent className="pt-0">
                                 {/* Add Item Input */}
@@ -168,13 +270,13 @@ export function Lists() {
                                 </div>
 
                                 {/* Items List */}
-                                <div className="space-y-2">
+                                <div>
                                     {list.items.map((item) => (
                                         <div
                                             key={item.id}
-                                            className="flex items-center justify-between py-2 px-1 hover:bg-white/60 rounded-md group transition-colors">
-                                            <span className="text-sm text-gray-700">
-                                                {item.name}
+                                            className="flex items-center justify-between py-1 px-1 hover:bg-white/60 rounded-md group transition-colors">
+                                            <span className="text-md text-gray-700 font-semibold">
+                                                • {item.name}
                                             </span>
                                             <Button
                                                 size="icon"

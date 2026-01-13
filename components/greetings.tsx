@@ -23,7 +23,7 @@ export function Greetings() {
                 Hello, {user?.name || 'User'}!
             </h1>
             <p className="text-gray-500 mt-1">
-                Ready to tackle your shopping list today?
+                Ready to be conscious about your shopping today?
             </p>
         </div>
     );
