@@ -13,6 +13,7 @@ import {
 import { Plus, Trash2, ChevronDown } from 'lucide-react';
 import Image from 'next/image';
 import { UserMenu } from '@/components/user-menu';
+import { Greetings } from '@/components/greetings';
 
 interface ShoppingItem {
     id: string;
@@ -140,15 +141,7 @@ export default function Home() {
 
             {/* Main Content */}
             <main className="max-w-7xl mx-auto px-6 py-8">
-                {/* Greeting */}
-                <div className="mb-8">
-                    <h1 className="text-2xl font-bold text-gray-900">
-                        Hello, Alex!
-                    </h1>
-                    <p className="text-gray-500 mt-1">
-                        Ready to tackle your shopping list today?
-                    </p>
-                </div>
+                <Greetings />
 
                 {/* Lists Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
