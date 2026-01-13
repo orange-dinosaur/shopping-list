@@ -8,7 +8,7 @@ import {
     TriangleAlertIcon,
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
-import { Toaster as Sonner, type ToasterProps } from 'sonner';
+import { Toaster as Sonner, type ToasterProps, toast } from 'sonner';
 
 const Toaster = ({ ...props }: ToasterProps) => {
     const { theme = 'system' } = useTheme();
@@ -16,7 +16,19 @@ const Toaster = ({ ...props }: ToasterProps) => {
     return (
         <Sonner
             theme={theme as ToasterProps['theme']}
-            className="toaster group"
+            className="toaster group z-9999!"
+            position="bottom-right"
+            richColors
+            toastOptions={{
+                classNames: {
+                    toast: 'group toast group-[.toaster]:bg-background group-[.toaster]:text-foreground group-[.toaster]:border-border group-[.toaster]:shadow-lg',
+                    description: 'group-[.toast]:text-muted-foreground',
+                    actionButton:
+                        'group-[.toast]:bg-primary group-[.toast]:text-primary-foreground',
+                    cancelButton:
+                        'group-[.toast]:bg-muted group-[.toast]:text-muted-foreground',
+                },
+            }}
             icons={{
                 success: <CircleCheckIcon className="size-4" />,
                 info: <InfoIcon className="size-4" />,
@@ -37,4 +49,4 @@ const Toaster = ({ ...props }: ToasterProps) => {
     );
 };
 
-export { Toaster };
+export { Toaster, toast };
