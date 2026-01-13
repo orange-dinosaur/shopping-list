@@ -68,9 +68,15 @@ export async function signup(
     } catch (error: unknown) {
         console.error(error);
         // Handle BetterAuth APIError
-        if (error && typeof error === 'object' && 'status' in error && 'message' in error) {
+        if (
+            error &&
+            typeof error === 'object' &&
+            'status' in error &&
+            'message' in error
+        ) {
             returnState.status = (error as { status: number }).status || 500;
-            returnState.message = (error as { message: string }).message || 'An error occurred';
+            returnState.message =
+                (error as { message: string }).message || 'An error occurred';
         } else {
             returnState.status = 500;
             returnState.message = 'Internal Server Error';

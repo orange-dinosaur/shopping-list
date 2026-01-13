@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSessionCookie } from 'better-auth/cookies';
 
-const protectedRoutes = [
-    '/',
-];
+const protectedRoutes = ['/'];
 const authRoutes = ['/login', '/signup'];
 
 export default async function proxy(request: NextRequest) {
@@ -22,7 +20,7 @@ export default async function proxy(request: NextRequest) {
     // Use exact match for '/' to avoid matching all paths
     if (
         !sessionCookie &&
-        protectedRoutes.some((route) => 
+        protectedRoutes.some((route) =>
             route === '/' ? pathname === '/' : pathname.startsWith(route)
         )
     ) {
@@ -33,9 +31,5 @@ export default async function proxy(request: NextRequest) {
 }
 
 export const config = {
-    matcher: [
-        '/',
-        '/login',
-        '/signup',
-    ],
+    matcher: ['/', '/login', '/signup'],
 };
